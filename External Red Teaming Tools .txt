@@ -1,0 +1,20 @@
+External Red Teaming Tools 
+
+1. Spf-record.com 
+https://www.spf-record.com/spf-lookup
+
+2. ipaddress.com 
+https://www.ipaddress.com/website 
+
+3. Website informer 
+https://website.informer.com/ 
+
+4. nmap online 
+https://nmap.online/
+
+5. Subdomain finder 
+https://subdomainfinder.c99.nl/scans/2024-01-20/ 
+
+6. Builtwith 
+https://builtwith.com/
+
