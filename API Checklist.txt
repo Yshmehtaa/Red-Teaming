@@ -1,0 +1,31 @@
+Checklist API 
+The following pointers are checked 
+
+Missing Authorization header
+Manipulating Authorization token 
+Decrypting the token, manipulate and forward the authorization token 
+Clear text submission of password  --NA (body is encrypted)
+SQL injection 
+Https methods enable 
+server banner disclosure 
+improper error handling 
+missing security headers 
+rate limit not implemented 
+Improper schema validation 
+weak ciphers 
+server side validation for verification 
+PII data exposure 
+obsolete SSL TLS enabled 
+Password submit using GET method 
+username enumeration 
+Decrypt the Response, Decrypt the request and manipulate 
+Internal path disclosure 
+Private IP disclosure 
+Weak Authentication mechanism 
+Possible SQL injection 
+Host Header Attacks 
+IDOR 
+Replay Attack 
+Basic Auth 
+Input field validation  
+Cookie attribute or path not set -- NA (Cookies are used in Exploitations)

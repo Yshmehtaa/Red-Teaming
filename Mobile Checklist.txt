@@ -1,0 +1,37 @@
+Frida server 
+
+C:\Tools\platform-tools_r34.0.3-windows\platform-tools>adb devices
+C:\Tools\platform-tools_r34.0.3-windows\platform-tools>adb shell 
+>su
+>cd data/local/tmp
+>./frida-server-16.0.11-android-arm64
+
+Root detection bypass
+cmd>frida-ps -Uai (#list all the processes)
+>frida --codeshare limyout/root-detection-and--ssl-pinning -U -f PAKAGE NAME (https://codeshare.frida.re/@limyout/root-detection-and--ssl-pinning/)
+>frida --codeshare KaiserBloo/ssl-and-root-bypass -U -f com.ltfs.lti.ltfs
+
+
+OWASP top 10
+M1: Improper Credential Usage
+M2: Inadequate Supply Chain Security
+M3: Insecure Authentication/Authorization
+M4: Insufficient Input/Output Validation
+M5: Insecure Communication
+M6: Inadequate Privacy Controls
+M7: Insufficient Binary Protections
+M8: Security Misconfiguration
+M9: Insecure Data Storage
+M10:Insufficient Cryptography 
+
+
+##Static Analysis 
+Package Details
+1. Android backup -- false 
+2. Deggubable -- false 
+3. usecleartexttraffic -- false 
+4. minSDKversion -- >16 
+
+To see the hash for apk 
+certutil -hashfile PATH MD5 
+ 
