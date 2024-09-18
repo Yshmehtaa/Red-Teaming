@@ -21,3 +21,11 @@ https://builtwith.com/
 7. Social Engineering tool 
 https://github.com/osintambition/Social-Media-OSINT-Tools-Collection 
 
+
+7. Google dorking 
+https://pentest-tools.com/information-gathering/google-hacking 
+
+8. IPDB 
+
+9. Crawling the website: 
+Katana (My fav)
