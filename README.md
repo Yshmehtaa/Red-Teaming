@@ -1,3 +1,19 @@
+for explots use the following websites 
+1. cvedetails.com 
+2. exploitdb.com 
+3. rapid7.com 
+4. 0day.today 
+
+To check the IP address of the web-application which is behind the firewall 
+1. ping the domain 
+2. Tracert the site
+3. nslookup 
+4. verify if the website is really giving the firewall IP 
+5. securityTrails and search domain 
+6. censys.io 
+7. shodan.io
+
+
 https://github.com/jonaslejon/malicious-pdf
 
 If you Admin creds -- download RSAT and Access Active directory users and group 
