@@ -43,3 +43,12 @@ smbclient and smbmap
 1. smbclient -H IP
 2. smbmap -H IP -d domain -u ad_id -p ad_pass
 3. 
+
+
+
+
+##Chatgpt prompts for redteaming 
+Can I run PowerShell remotely from Kali against the Windows machine?
+Can I simulate the PowerShell environment of Windows by running it on Kali?
+Can I bypass the local PowerShell restriction by using PowerShell from Kali?
+how to Download PowerShell portable version on the Windows machine
