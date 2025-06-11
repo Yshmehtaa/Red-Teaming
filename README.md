@@ -1,3 +1,7 @@
+Install powershell on the system manually by pwsh.exe 
+https://github.com/PowerShell/PowerShell/releases
+
+
 for explots use the following websites 
 1. cvedetails.com 
 2. exploitdb.com 
