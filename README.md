@@ -1,6 +1,8 @@
 Install powershell on the system manually by pwsh.exe (even if the PS is blocked from the domain)
 https://github.com/PowerShell/PowerShell/releases
 
+https://chatgpt.com/share/68496748-7470-8012-8166-308af12d8503
+
 
 for explots use the following websites 
 1. cvedetails.com 
