@@ -1,4 +1,4 @@
-Install powershell on the system manually by pwsh.exe 
+Install powershell on the system manually by pwsh.exe (even if the PS is blocked from the domain)
 https://github.com/PowerShell/PowerShell/releases
 
 
