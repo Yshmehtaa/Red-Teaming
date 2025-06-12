@@ -52,3 +52,7 @@ Can I run PowerShell remotely from Kali against the Windows machine?
 Can I simulate the PowerShell environment of Windows by running it on Kali?
 Can I bypass the local PowerShell restriction by using PowerShell from Kali?
 how to Download PowerShell portable version on the Windows machine
+
+
+Command to list the Domain Controllers 
+nltest/dclist:DOMAIN
