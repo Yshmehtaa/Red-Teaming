@@ -56,3 +56,24 @@ how to Download PowerShell portable version on the Windows machine
 
 Command to list the Domain Controllers 
 nltest/dclist:DOMAIN
+
+
+command to forcefully update the latest GPO Policy to update is 
+gpudate /force 
+
+While capturing the response from the Responder - 
+the captured NTLMv2-SSP Hash/Net-NTML hash- 
+The format of this hash look like this 
+
+Challenge.Signature.MD5 
+
+while authenticating or using the hashes always use the --local-auth because it will  login as the local administrator. 
+
+If we are not not using --local-auth we trying to login as domain account/domain user if at all the hash is not proper then we can lock out the administrator account 
+
+also use --lsa after you recognize the local administrator  
+
+
+This all will be blocked by the EDR; so you can do is install the RAMDUMP (where the password used are stored in the RAM) and Analys the ramdump using the tool volatility tool. (used for the forensics)  
+
+
