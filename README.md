@@ -86,3 +86,11 @@ net group "" /domain
 net account /domain 
 nltest /dclist:domainname (list the domain controllers: PDC(primary domain controller))
 
+PS> Powerview - commands 
+Get-NetComputer | select dnshostname  (All the computers in the domain)
+Get-NetComputer -Ping | select dnshostname  (All the computer which are reachable in the domain) 
+Get-NetUser | select samaccountname, description 
+Get-NetUser
+Get-NetUser "user" 
+
+
