@@ -77,4 +77,12 @@ also use --lsa after you recognize the local administrator
 
 This all will be blocked by the EDR; so you can do is install the RAMDUMP (where the password used are stored in the RAM) and Analys the ramdump using the tool volatility tool. (used for the forensics)  
 
+Manual approach to enumerate the Domain - cmd,powershell 
+
+net users/user  /domain 
+net user "" /domain 
+net group /domain 
+net group "" /domain 
+net account /domain 
+nltest /dclist:domainname (list the domain controllers: PDC(primary domain controller))
 
