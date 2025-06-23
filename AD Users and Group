@@ -1,0 +1,25 @@
+##Install Active Directory Users and group in windows -- Best way to enum the AD through GUI
+Method 1: Powershell 
+
+Open PowerShell as Administrator and run:
+In powershell
+# Install the Active Directory module only
+PS > Add-WindowsCapability -Online -Name "Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0" 
+
+To confirm it's installed:
+PS > Get-Module -ListAvailable -Name ActiveDirectory
+
+Method 2: Install via Settings (GUI)
+Go to Settings > Apps > Optional Features
+Click on Add a feature
+Search for:
+RSAT: Active Directory Domain Services and Lightweight Directory Services
+Click Install
+Wait for it to finish (may take a few minutes)
+
+Verify RSAT Installation
+Open PowerShell and run:
+PS > Import-Module ActiveDirectory
+Get-ADUser -Filter * 
+
+If it runs without error, RSAT is installed correctly.
