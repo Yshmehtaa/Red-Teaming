@@ -1,3 +1,7 @@
+https://studentvm.redfoxsec.com/      [DbzW0gqSLA5nHv]
+SECURITY\studentuser1:Zt8$kP9vLx#2
+
+
 
 Install powershell on the system manually by pwsh.exe (even if the PS is blocked from the domain)
 https://github.com/PowerShell/PowerShell/releases
